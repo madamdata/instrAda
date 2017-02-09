@@ -232,12 +232,13 @@ LFO {
 }
 
 //almost exactly like playbuf, but doesn't force cubic interpolation. Assumes stereo file
-//but you can specify otherwise.
+//but you can specify otherwise. ResetPos is now from 0-1 for convenience. 
 //Also slays vampires
 Buffy {
 	*ar {|buf,trig=0,rate=1,resetPos=0,loop=1,interpolation=1,numChannels=2|
-		var sig, phase;
-		phase = Phasor.ar(0,rate*BufRateScale.kr(buf),0,BufFrames.kr(buf),resetPos:resetPos);
+		var sig, phase,frames;
+		frames = BufFrames.kr(buf);
+		phase = Phasor.ar(trig,rate*BufRateScale.kr(buf),0,frames,resetPos:resetPos*frames);
 		sig = BufRd.ar(numChannels,buf,phase,loop,interpolation);
 		^sig;
 	}
