@@ -235,11 +235,19 @@ LFO {
 //but you can specify otherwise. ResetPos is now from 0-1 for convenience. 
 //Also slays vampires
 Buffy {
-	*ar {|buf,trig=0,rate=1,resetPos=0,loop=1,interpolation=1,numChannels=2|
-		var sig, phase,frames;
+	*ar {|buf,trig=0,rate=1,resetPos=0,startPos=0,filt=1500,res=0.2,fmix=0.65,strig=0,stutterRate=10,loop=1,interpolation=1,numChannels=2,phase=nil|
+		var sig, phasor,frames,stutter;
 		frames = BufFrames.kr(buf);
-		phase = Phasor.ar(trig,rate*BufRateScale.kr(buf),0,frames,resetPos:resetPos*frames);
-		sig = BufRd.ar(numChannels,buf,phase,loop,interpolation);
+		stutter = Impulse.ar(stutterRate) * strig;
+		if (phase.isNil, 
+			{
+				phasor = Phasor.ar(trig+stutter,rate*BufRateScale.kr(buf),startPos,frames,resetPos:resetPos*frames)},
+				{
+					phasor = phase;
+				
+				});
+		sig = BufRd.ar(numChannels,buf,phasor,loop,interpolation);
+		sig = BMoog.ar(sig,filt,res) * fmix + (sig * (1-fmix));
 		^sig;
 	}
 }
